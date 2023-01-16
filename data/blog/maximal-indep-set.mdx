@@ -47,7 +47,7 @@ Taking the inequality above, we may use 0-1 integer programming to compute the s
 **Theorem.** The following 0-1 integer programming problem is in NP:
 
 Take our encoded binary string representation of the graph $G=(V,E,w)$ as an adjacency matrix
-$M=m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$. Consider the clique $U$ satisfying $\sum_{u_i\in U}x_i\leq 1$, and set every entry of $m_{ij}\in M$ to zero if $m_ij\notin U$. Now, find a vector $x$ such that the following element-wise comparison holds:
+$M=m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$. Consider the clique $U$ satisfying $\sum_{u_i\in U}x_i\leq 1$, and set every entry of $m_{ij}\in M$ to zero if $m_{ij}\notin U$. Now, find a vector $x$ such that the following element-wise comparison holds:
 
 $$
 \begin{bmatrix}
