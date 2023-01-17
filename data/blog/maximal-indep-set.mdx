@@ -12,7 +12,7 @@ output:
 date: '2022-12-05'
 tags: ['math', 'optimization']
 draft: false
-summary: 'Finding the independent set of largest weight in a graph with weighted verticies, in the event of a collapse of the polynomial hierarchy.'
+summary: 'Finding the independent set of largest weight in a graph with weighted verticies, if the polynomial hierarchy collapses.'
 ---
 
 # Introduction
@@ -28,10 +28,10 @@ Under the assumption that $P=NP$, given a vertex weighted graph $G=(V,E,w)$ with
 
 We can write any graph $G=(V,E)$ as a $|V|\times|V|$ adjacency matrix, meaning we can encode $G$ as the binary string $m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$ with length $|V|^2$. Since $2^k\in \mathbb{Z}^+$ is the largest integer in the codomain of $w$ and $2^k$ has length $k$ in binary, if we assume that, for the sake of a worst case encoding, $\forall v\in V, w(v)=2^k$, then the length of encoding of a vertex weighted graph $G=(V,E,w)$ will be worst case less than $k|V|^2$. Hence, time as a function of the length of the encoding of the input in binary can be written as $O(k|V|^2)$. Alternatively, if we did not want to represent $G$ as an adjacency matrix, and we had some machine configured to read a weighted graph as an input string, we could shorten a tight upper bound on input time as a function of length to $O(|E|+k|V|)$.
 
-For a maximum weighted independent set, let $x_i=1$ if $i\in \{i:v_i\in V'\}$, and $x_i=0$ otherwise. Now, the optimization problem can be stated as:
+For a maximum weighted independent set, let $x_i=1$ if $i\in \{i:v_i\in V'\}$, and $x_i=0$ otherwise. Now, the optimization problem can be restated as maximizing
 
 $$
-maximize\ \sum_{i=1}^{|V|}w(v_i)x_i\ s.t.\ \forall (v_i,v_j)\in E, x_i+x_j\leq 1
+\sum_{i=1}^{|V|}w(v_i)x_i\text{s.t.}\forall (v_i,v_j)\in E, x_i+x_j\leq 1
 $$
 
 Equivalently, for all solutions to this problem, the following holds for a clique $U\subseteq V$
