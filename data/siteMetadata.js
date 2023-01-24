@@ -11,11 +11,11 @@ const siteMetadata = {
   image: '/static/images/avatar.png',
   socialBanner: '/static/images/twitter-card.png',
   email: 'alexanderrosen45@gmail.com',
-  github: 'https://github.com',
-  twitter: 'https://twitter.com/Twitter',
+  github: 'https://github.com/alexrosen45',
+  twitter: 'https://twitter.com/AlexRos27300998',
   facebook: 'https://facebook.com',
   youtube: 'https://youtube.com',
-  linkedin: 'https://www.linkedin.com',
+  linkedin: 'https://www.linkedin.com/in/alex-rosen-7152281b7/',
   locale: 'en-US',
   analytics: {
     // If you want to use an analytics provider you have to add it to the
