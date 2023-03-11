@@ -9,4 +9,4 @@ linkedin: https://www.linkedin.com/in/alex-rosen-7152281b7/
 github: https://github.com/alexrosen45
 ---
 
-Hi, I'm Alex! I study computer science at the University of Toronto with a growing interest in machine learning, complexity theory, and the mathematics behind modeling financial markets.
+Hi, I'm Alex, a computer science student at the University of Toronto with a growing interest in machine learning, complexity theory, and the mathematics behind modeling financial markets.
