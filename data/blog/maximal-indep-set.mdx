@@ -10,41 +10,35 @@ output:
       listing: null
 
 date: '2022-12-05'
-tags: ['math', 'optimization', 'decision problems']
+tags: ['graphs', 'optimization', 'decision problems']
 draft: false
 summary: 'A non-deterministic algorithm for finding the independent set of largest weight in a graph with weighted verticies.'
 ---
 
 # Introduction
 
-Consider the following optimization problem in polynomial time, where time is measured as a function of the length of the encoding of the input.
+Consider the following optimization problem.
 
 Under the assumption that $P=NP$, given a vertex weighted graph $G=(V,E,w)$ with $w:V\mapsto \{1, 2, ... ,2^k\}$ for some $k\in \mathbb{Z^+}$, find an independent set $V'\subseteq V$ that maximizes $\sum_{v\in V'}w(v)$.
 
 # Restating the Problem
 
-We can encode $G$ as a $|V|\times|V|$ adjacency matrix using the binary string $m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$ with length $|V|^2$. Since $2^k$, from the codomain of $w$, gives the largest possible weight of any vertex, if we assume that each vertex has weight $2^k$ for the sake of a worst case binary encoding, then the length of encoding of our vertex weighted graph will be worst case less than $k|V|^2$. Consequentely, time as a function of the length of the encoding of the input in binary can be written as $O(k|V|^2)$. Alternatively, if we did not want to represent $G$ as an adjacency matrix, and we had some machine configured to read a weighted graph as string input, we could shorten a tight upper bound on input time as a function of length to $O(|E|+k|V|)$.
+We can encode $G$ as a $|V|\times|V|$ adjacency matrix using the binary string $m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$ with length $|V|^2$. Since $2^k$, from the codomain of $w$, gives the largest possible weight of any vertex, if we assume that each vertex has weight $2^k$ for the sake of a worst case binary encoding, the length of our encoding will be worst case less than $k|V|^2$. Consequentely, time as a function of the length of the input encoded in binary form is $O(k|V|^2)$. Alternatively, if we did not want to represent $G$ as an adjacency matrix, and had some machine configured to read a weighted graph as an input string, we could, in certain cases, shorten a tight upper bound on input time to $O(|E|+k|V|)$.
 
 For a maximum weighted independent set, let $x_i=1$ if $v_i\in V'$, and $x_i=0$ otherwise. Now, the optimization problem can be restated as maximizing
 
 $$
-\sum_{i=1}^{|V|}w(v_i)x_i\text{ such that }\forall (v_i,v_j)\in E, x_i+x_j\leq 1
+\sum_{i=1}^{|V|}w(v_i)x_i
 $$
 
-Notice that for all solutions to this new problem, the following holds for a clique $U\subseteq V$
-
-$$
-\sum_{u_i\in U}x_i\leq 1
-$$
-
-Taking the inequality above, we may use 0-1 integer programming to compute the solution to this problem, where a solution in polynomial time is attainable if this instance of 0-1 integer programming is in NP.
+subject to $x_i+x_j\leq 1$ for all $(v_i,v_j)\in E$. Notice that for all solutions to this new problem, we have $\sum_{u_i\in U}x_i\leq 1$ for any clique $U\subseteq V$. Taking this inequality, we may use 0-1 integer programming to compute the solution to this problem, where a solution in polynomial time is attainable if this instance of 0-1 integer programming is in NP.
 
 # Solution
 
 **Theorem.** The following 0-1 integer programming problem is in NP:
 
-Take our encoded binary string representation of the graph $G=(V,E,w)$ as an adjacency matrix
-$M=m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$. Consider the clique $U$ satisfying $\sum_{u_i\in U}x_i\leq 1$, and set every entry of $m_{ij}\in M$ to zero if $m_{ij}\notin U$. Now, find a vector $x$ such that the following element-wise comparison holds:
+Take our binary string representation of our graph $G=(V,E,w)$ as adjacency matrix
+$M=m_{11}m_{12}...m_{|V|1}...m_{1|V|}...m_{|V||V|}$. Consider the clique $U$ satisfying $\sum_{u_i\in U}x_i\leq 1$, and set every entry $m_{ij}$ in $M$ to zero if $m_{ij}$ is not in $U$. Now, find a vector $x$ such that the following (element-wise) comparison holds:
 
 $$
 \begin{bmatrix}
@@ -60,10 +54,10 @@ $$
 
 _Proof._ Take the problem above as a decision problem with certificate vector $x$. The left of the inequality above is computable in $O(|V|^2)$, and the element-wise comparison to verify whether the inequality holds takes $O(|V|)$. Thus, the certificate for this problem can be verified in polynomial time by a deterministic Turing machine that takes $M$ concatenated with a binary encoding of $U$ as input, making this an NP problem.
 
-Therefore, in the event of the collapse of the polynomial hierarchy, finding an independent set $V'\subseteq V$ that maximizes $\sum_{v\in V'}w(v)$ is computable in polynomial time. For an alternative approach, we could say that if $U$ is a Hamiltonian cycle of odd cardinality,
+Therefore, we have a non-deterministic polynomial time algorithm for finding an independent set $V'\subseteq V$ that maximizes $\sum_{v\in V'}w(v)$. For an alternative approach, we could say that if $U$ is a Hamiltonian cycle of odd cardinality,
 
 $$
 \sum_{u_i\in U}x_i\leq \frac{|U|-1}{2}
 $$
 
-Taking the above and previous inequalities, we can compute a solution to the maximum independent set problem using the Gomory cutting plane algorithm, which is likely slower given only the contraints in the problem, but has more promise for finding solutions in the absence of unpractical assumptions.
+By utilizing the aforementioned and preceding inequalities, we can compute a reasonable solution to the maximum independent set problem using the Gomory cutting plane algorithm. Although this approach may appear slower when considering only the few constraints of the original problem, it is well-suited for practical purposes.

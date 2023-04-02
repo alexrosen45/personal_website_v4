@@ -2,7 +2,7 @@ const siteMetadata = {
   title: "Alex Rosen's Website",
   author: 'Alex Rosen',
   headerTitle: "Alex Rosen's Website",
-  description: 'A blog created with Next.js and Tailwind.css',
+  description: 'In support of vector machines',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
