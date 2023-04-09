@@ -1,0 +1,103 @@
+---
+title: Shuffling Regular Languages
+output:
+  pdf_document:
+    extra_dependencies:
+      amsmath: null
+      amssymb: null
+      graphicx: null
+      hyperref: ['colorlinks=true', 'allcolors=blue']
+      listing: null
+      mathcal: null
+
+date: '2023-04-08'
+tags: ['automata-theory', 'finite-automata', 'regular-languages']
+draft: true
+summary: 'Proving a closure property of regular languages.'
+---
+
+# Introduction
+
+Regular languages are important because they provide a formalism for
+describing and reasoning about patterns in strings, which are a fundamental to
+designing programming languages. The following is a problem from a course took,
+which I thought to be interesting enough to share here.
+
+**Theorem.**
+
+Let $\Sigma$ be some finite alphabet. For languages $A \subseteq \Sigma^*$
+and $B \subseteq \Sigma^*$, let the shuffling of $A$ and $B$, denoted
+shuffle$(A,B)$, be the language
+
+$$
+\text{shuffle}(A,B)=\{w\in \Sigma^*|w=a_1b_1\ldots a_kb_k\text{ where $a_1\ldots a_k\in A$ and $b_1\ldots b_k\in B$ for some $k\in \mathbb{Z}^+$}\}
+$$
+
+The class of regular languages is closed under the shullfing operation.
+
+# Solution
+
+Before we begin, I recommend
+
+_Proof._ Let $\Sigma$ be some finite alphabet. Let $A\subseteq \Sigma^*$ and $B\subseteq \Sigma^*$ be regular languages. Since $A$ and $B$ are regular languages, let $M_A=(Q_A,\Sigma,\delta_A,q^A_0,F_A)$ and $M_B=(Q_B,\Sigma,\delta_B,q^B_0,F_B)$ be deterministic finite automata such that $\mathcal{L}(M_A)=A$ and $\mathcal{L}(M_B)=B$. Let $M=(Q,\Sigma,\delta,(q^A_0,q^B_0,A),F)$ be a deterministic finite automaton where $Q=Q_A\times Q_B\times \{A,B\}$, $F=F_A\times F_B\times \{A\}$, and $\delta:Q\times\Sigma\mapsto Q$ is defined by for all $q^A_i\in Q_A$, $q^B_j\in Q_B$, and $w\in \Sigma^*$,
+
+$$
+\begin{aligned}
+\delta((q^A_i,q^B_j,A),w)=(\delta_A(q^A_i,w),q^B_j,B)\\
+\delta((q^A_i,q^B_j,B),w)=(q^A_i,\delta_B(q^B_j,w),A)
+\end{aligned}
+$$
+
+Let $w\in \Sigma^*$ and notice that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}((q_0^A,q_0^B,A),w)\in F$. Since $F=F_A\times F_B\times \{A\}$, by the definition of $\delta$, we can see that $M$ rejects $w$ if $w$ is of odd length or the empty string. Now, consider the case where $w$ has even length. That is, $w=x_1y_1\ldots x_ky_k$ for some $k\in \mathbb{Z}^+$ where $x_1\ldots x_k\in \Sigma^*$ and $y_1\ldots y_k\in \Sigma^*$. By induction, we can show that, $\hat{\delta}((q_0^A,q_0^B,A),w)=(\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A)$. It follows that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}_A(q_0^A,x_1\ldots x_k)\in F_A$ and $\hat{\delta}_B(q_0^B,y_1\ldots y_k)\in F_B$. Equivalently, $w\in \mathcal{L}(M)$ if and only if $x_1\ldots x_k\in \mathcal{L}(M_A)=A$ and $y_1\ldots y_k\in \mathcal{L}(M_B)=B$. Therefore,
+
+$$
+\mathcal{L}(M)=\{w\in \Sigma^*|w=a_1b_1\ldots a_kb_k\text{ where $a_1\ldots a_k\in A$ and $b_1\ldots b_k\in B$ for some $k\in \mathbb{Z}^+$}\}
+$$
+
+Thus, the class of regular languages is closed under the shuffling operation.
+
+# Some Remarks
+
+Proving the lemma:
+
+**Lemma**
+Let $k\in \mathbb{Z}^+$. For all $x_1y_1\ldots x_ky_k\in \Sigma^*$,
+
+$$
+\hat{\delta}((q_0^A,q_0^B,A),x_1y_1\ldots x_ky_k)=(\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A)
+$$
+
+_Proof._
+
+**Base Case:** Let $k=1$
+
+$$
+\begin{aligned}
+    \hat{\delta}((q_0^A,q_0^B,A),x_1y_1)&=\delta(\hat{\delta}((q_0^A,q_0^B,A),x_1),y_1)\\
+    &=\delta(\delta(\hat{\delta}((q_0^A,q_0^B,A),\lambda),x_1),y_1)\\
+    &=\delta(\delta((q_0^A,q_0^B,A),x_1),y_1)\\
+    &=\delta((\delta_A(q_0^A,x_1),q_0^B,B)y_1)\\
+    &=(\delta_A(q_0^A,x_1),\delta_B(q_0^B,y_1),A)\\
+    &=(\hat{\delta}_A(q_0^A,x_1),\hat{\delta}_B(q_0^B,y_1),A)
+\end{aligned}
+$$
+
+**Induction Step:** Let $k\in \mathbb{Z}^+$ and assume
+
+$$
+\hat{\delta}((q_0^A,q_0^B,A),x_1y_1\ldots x_ky_k)=(\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A)\quad\text{(1)}
+$$
+
+Then,
+
+$$
+\begin{aligned}
+\hat{\delta}((q_0^A,q_0^B,A)x_1y_1\ldots x_{k+1}y_{k+1})&=\delta(\hat{\delta}((q_0^A,q_0^B,A)x_1y_1\ldots x_ky_kx_{k+1}),y_{k+1})\\
+    &=\delta(\delta(\hat{\delta}((q_0^A,q_0^B,A),x_1y_1\ldots x_ky_k),x_{k+1}),y_{k+1})\\
+    &=\delta(\delta((\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A),x_{k+1}),y_{k+1})&\text{(1)}\\
+    &=\delta((\delta_A(\hat{\delta}_A(q_0^A,x_1\ldots x_k),x_{k+1}),\hat{\delta}_B(q_0^B,y_1\ldots y_k),B)y_{k+1})\\
+    &=\delta((\hat{\delta}_A(q_0^A,x_1\ldots x_{k+1}),\hat{\delta}_B(q_0^B,y_1\ldots y_k),B),y_{k+1})\\
+    &=\delta(\hat{\delta}_A(q_0^A,x_1\ldots x_{k+1}),\delta(\hat{\delta}_B(q_0^B,y_1\ldots y_k),y_{k+1}),A)\\
+    &=\delta(\hat{\delta}_A(q_0^A,x_1\ldots x_{k+1}),\hat{\delta}_B(q_0^B,y_1\ldots y_{k+1}),A)
+\end{aligned}
+$$
