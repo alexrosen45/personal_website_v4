@@ -11,7 +11,7 @@ output:
 
 date: '2023-04-08'
 tags: ['automata-theory', 'finite-automata', 'regular-languages']
-draft: true
+draft: false
 summary: 'Proving a closure property of regular languages.'
 ---
 
@@ -19,10 +19,18 @@ summary: 'Proving a closure property of regular languages.'
 
 Regular languages are important because they provide a formalism for
 describing and reasoning about patterns in strings, which are a fundamental to
-designing programming languages. The following is a problem from a course took,
-which I thought to be interesting enough to share here.
+designing programming languages. Since each regular language can be modeled as
+a deterministic finite automaton (DFA), they can provide a benchmark for the
+running time of algorithms involving string data. For instance, the set of all
+email addresses forms a regular language, so, omitting space complexity, we know we can check
+if some ASCII (or even RFC 5322 ^[To create your own RFC 5322 regular expression, see the current [Internet Message Format](https://www.rfc-editor.org/rfc/rfc5322)]) string is a syntactically correct email address in $\mathcal{O}(n)$.
 
-**Theorem.**
+The following is a problem from a course took,
+which I thought to be interesting enough to share here.
+It deals with a somewhat uncommon closure property of
+regular languages.
+
+#### Theorem.
 
 Let $\Sigma$ be some finite alphabet. For languages $A \subseteq \Sigma^*$
 and $B \subseteq \Sigma^*$, let the shuffling of $A$ and $B$, denoted
@@ -36,7 +44,9 @@ The class of regular languages is closed under the shullfing operation.
 
 # Solution
 
-Before we begin, I recommend
+The proof below it somewhat unorthodox in the sense that it constructs a DFA using two other DFAs.
+Usually, when proving closure properties, it is much easier to constructs a non-deterministic finite
+automaton and state its equivalence to a DFA, but I found this approach unecessary in this case.
 
 _Proof._ Let $\Sigma$ be some finite alphabet. Let $A\subseteq \Sigma^*$ and $B\subseteq \Sigma^*$ be regular languages. Since $A$ and $B$ are regular languages, let $M_A=(Q_A,\Sigma,\delta_A,q^A_0,F_A)$ and $M_B=(Q_B,\Sigma,\delta_B,q^B_0,F_B)$ be deterministic finite automata such that $\mathcal{L}(M_A)=A$ and $\mathcal{L}(M_B)=B$. Let $M=(Q,\Sigma,\delta,(q^A_0,q^B_0,A),F)$ be a deterministic finite automaton where $Q=Q_A\times Q_B\times \{A,B\}$, $F=F_A\times F_B\times \{A\}$, and $\delta:Q\times\Sigma\mapsto Q$ is defined by for all $q^A_i\in Q_A$, $q^B_j\in Q_B$, and $w\in \Sigma^*$,
 
@@ -47,7 +57,7 @@ $$
 \end{aligned}
 $$
 
-Let $w\in \Sigma^*$ and notice that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}((q_0^A,q_0^B,A),w)\in F$. Since $F=F_A\times F_B\times \{A\}$, by the definition of $\delta$, we can see that $M$ rejects $w$ if $w$ is of odd length or the empty string. Now, consider the case where $w$ has even length. That is, $w=x_1y_1\ldots x_ky_k$ for some $k\in \mathbb{Z}^+$ where $x_1\ldots x_k\in \Sigma^*$ and $y_1\ldots y_k\in \Sigma^*$. By induction, we can show that, $\hat{\delta}((q_0^A,q_0^B,A),w)=(\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A)$. It follows that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}_A(q_0^A,x_1\ldots x_k)\in F_A$ and $\hat{\delta}_B(q_0^B,y_1\ldots y_k)\in F_B$. Equivalently, $w\in \mathcal{L}(M)$ if and only if $x_1\ldots x_k\in \mathcal{L}(M_A)=A$ and $y_1\ldots y_k\in \mathcal{L}(M_B)=B$. Therefore,
+Let $w\in \Sigma^*$ and notice that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}((q_0^A,q_0^B,A),w)\in F$^[See the definition of the extended transition function of a DFA, $\hat{\delta}$, [here](https://courses.cis.cornell.edu/cs2800/wiki/index.php/Extended_transition_function)]. Since $F=F_A\times F_B\times \{A\}$, by the definition of $\delta$, we can see that $M$ rejects $w$ if $w$ is of odd length or the empty string. Now, consider the case where $w$ has even length. That is, $w=x_1y_1\ldots x_ky_k$ for some $k\in \mathbb{Z}^+$ where $x_1\ldots x_k\in \Sigma^*$ and $y_1\ldots y_k\in \Sigma^*$. By induction ([here](#lemma)), we can show that, $\hat{\delta}((q_0^A,q_0^B,A),w)=(\hat{\delta}_A(q_0^A,x_1\ldots x_k),\hat{\delta}_B(q_0^B,y_1\ldots y_k),A)$. It follows that $w\in \mathcal{L}(M)$ if and only if $\hat{\delta}_A(q_0^A,x_1\ldots x_k)\in F_A$ and $\hat{\delta}_B(q_0^B,y_1\ldots y_k)\in F_B$. Equivalently, $w\in \mathcal{L}(M)$ if and only if $x_1\ldots x_k\in \mathcal{L}(M_A)=A$ and $y_1\ldots y_k\in \mathcal{L}(M_B)=B$. Therefore,
 
 $$
 \mathcal{L}(M)=\{w\in \Sigma^*|w=a_1b_1\ldots a_kb_k\text{ where $a_1\ldots a_k\in A$ and $b_1\ldots b_k\in B$ for some $k\in \mathbb{Z}^+$}\}
@@ -59,7 +69,8 @@ Thus, the class of regular languages is closed under the shuffling operation.
 
 Proving the lemma:
 
-**Lemma**
+#### lemma.
+
 Let $k\in \mathbb{Z}^+$. For all $x_1y_1\ldots x_ky_k\in \Sigma^*$,
 
 $$
@@ -73,7 +84,7 @@ _Proof._
 $$
 \begin{aligned}
     \hat{\delta}((q_0^A,q_0^B,A),x_1y_1)&=\delta(\hat{\delta}((q_0^A,q_0^B,A),x_1),y_1)\\
-    &=\delta(\delta(\hat{\delta}((q_0^A,q_0^B,A),\lambda),x_1),y_1)\\
+    &=\delta(\delta(\hat{\delta}((q_0^A,q_0^B,A),\epsilon),x_1),y_1)\\
     &=\delta(\delta((q_0^A,q_0^B,A),x_1),y_1)\\
     &=\delta((\delta_A(q_0^A,x_1),q_0^B,B)y_1)\\
     &=(\delta_A(q_0^A,x_1),\delta_B(q_0^B,y_1),A)\\
