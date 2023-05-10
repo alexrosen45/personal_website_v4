@@ -1,5 +1,5 @@
 ---
-title: Writing Neural Networks From Scratch in C++
+title: Multilayer Perceptrons From Scratch in C++
 output:
   pdf_document:
     extra_dependencies:
@@ -9,10 +9,43 @@ output:
       hyperref: ['colorlinks=true', 'allcolors=blue']
       listing: null
 
-date: '2022-12-05'
+date: '2023-05-22'
 tags: ['C++', 'neural networks', 'machine learning']
 draft: true
-summary: 'A walkthrough of how to implement your own neural network from scratch using gradient descent.'
+summary: 'summary here'
+layout: PostSimple
 ---
 
-# Introduction
+## Introduction
+
+## Implementing Tools From Linear Algebra
+
+Before constructing our MLP, it's useful to first implement a Matrix class with typical
+matrix operations (scalar multiplication, transpose, etc.).
+While this may appear unnecessary, since we can represent a neural network's parameters as, perhaps,
+a vector of vectors, parameters are canonically introduced using matrices, so representing them in a
+standard way can simplify implementing fast matrix multiplication and facilitate better understanding
+of the code for backpropagation. If you would rather skip this section and not worry about writing
+this on your own, I suggest familiarizing yourself with Eigen ^[Check out [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+as an alternative to building matrices on your own.] instead.
+
+```cpp:matrix.cpp
+class Matrix {
+    public:
+        size_t num_rows;
+        size_t num_cols;
+        size_t num_entries;
+        // colums are stacked in order
+        std::vector<double> entries;
+        std::tuple<size_t, size_t> shape;
+
+    Matrix(size_t num_rows, size_t num_cols):
+    num_rows(num_rows), num_cols(num_cols), entries({}) {
+        entries.resize(num_rows * num_cols);
+        shape = {num_rows, num_cols};
+    }
+    Matrix() : num_rows(0), num_cols(0), entries({}) {
+        shape = {0, 0};
+    }
+};
+```
