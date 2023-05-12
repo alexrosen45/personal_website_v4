@@ -47,5 +47,54 @@ class Matrix {
     Matrix() : num_rows(0), num_cols(0), entries({}) {
         shape = {0, 0};
     }
-};
+}
 ```
+
+The above implementation is fairly straightforward, where we are creating a matrix to be a
+vector representation of the column vector of our matrix; We represent the entries of the $i$-th column vector of our
+matrix (from the top down) as the vector with entries from `entries[num_rows * i]` to `entries[num_rows * i + num_rows - 1]`
+inclusive. Now, it should be clear how to write basic functions for our `Matrix` class, such as printing out it's entries.
+Try this on your own, then compare it to the code below.
+
+```cpp:matrix.cpp
+void print() {
+        if (num_rows == 0 && num_cols == 0) {
+            std::cout << "Matrix object is empty\n";
+        }
+        else {
+            for (size_t i = 0; i < num_cols; i++) {
+                for (size_t j = 0; j < num_rows; j++) {
+                    std::cout << entries[num_rows * i + j] << " ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+```
+
+For the sake of brevity, I'm not going to walk through each method's implementation step-by-step. Rather, I'm going to provide
+the code upfront, so we can focus our attention on building an MLP. Most, if not all, of these concepts which are implemented below should be familiar from
+an introductory linear algebra course, the one outline being fast matrix multiplication. Of course, the naive way to implement the multiplication of two $n\times n$ matrices
+is to write an $\mathcal{O}(n)^3$ algorithm. In our case, this might look something like the following.
+
+```cpp:matrix.cpp
+// naive matrix multiplication
+Matrix multiply(Matrix &other_matrix) {
+    // assumes num_cols == matrix.num_rows
+    Matrix new_matrix(other_matrix.num_cols, num_rows);
+    for (size_t i = 0; i < new_matrix.num_rows; i++) {
+        for (size_t j = 0; j < new_matrix.num_cols; j++) {
+            for (size_t k = 0; k < other_matrix.num_rows; k ++) {
+                new_matrix(i, j) += (*this)(j, k) * other_matrix(k, i);
+            }
+        }
+    }
+    return new_matrix;
+}
+```
+
+Instead, we can implement this in a faster way using **\_**. Continuing, we have our complete implementatio
+of `Matrix` below.
+
+## A short review of neural networks and backpropagation
