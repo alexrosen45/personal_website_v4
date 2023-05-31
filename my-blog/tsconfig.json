@@ -31,7 +31,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".contentlayer/generated",
-    ".contentlayer/generated/**/*.json"
+    ".contentlayer/generated/**/*.json",
+    "../contentlayer.config.ts"
   ],
   "exclude": ["node_modules"]
 }
