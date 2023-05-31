@@ -1,6 +1,6 @@
 ---
 name: Alex Rosen
-avatar: /static/images/avatar.png
+avatar: /static/images/avatar.jpg
 occupation: Computer Science Student
 company: University of Toronto
 email: alexanderrosen45@gmail.com
