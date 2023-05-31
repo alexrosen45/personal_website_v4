@@ -18,7 +18,7 @@ const Hero = () => {
           <div className="group relative">
             <div className="animate-tilt absolute -inset-0.5 rounded-lg bg-gradient-to-r from-cyan-600 to-amber-500 opacity-25 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-200"></div>
             <Link href="/projects">
-              <a className="relative flex items-center divide-x divide-gray-600 rounded-lg bg-white px-7 py-4 leading-none dark:bg-black">
+              <a className="relative flex items-center divide-x divide-gray-600 rounded-lg bg-white px-7 py-4 leading-none dark:bg-gray-800">
                 <span className="flex items-center space-x-5">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
