@@ -4,8 +4,8 @@ import siteMetadata from '@/data/siteMetadata'
 
 const Hero = () => {
   return (
-    <section className="min-w-screen flex items-center justify-between py-4">
-      <div className="mb-10 flex h-full w-1/3 flex-col justify-center xl:mb-0">
+    <section className="min-w-screen flex flex-col-reverse items-center justify-between pt-1 pb-2 sm:flex-row sm:py-4">
+      <div className="order-2 mb-2 flex h-full w-full flex-col justify-center sm:order-1 sm:mb-10 sm:w-1/3 xl:mb-0">
         <h1 className="mb-4 text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
           Latest
         </h1>
@@ -13,7 +13,7 @@ const Hero = () => {
           {siteMetadata.description}
         </p>
       </div>
-      <div className="grid w-2/3 grid-cols-1 gap-8 py-8">
+      <div className="order-1 grid w-full grid-cols-1 gap-8 pb-1 sm:order-2 sm:w-2/3 sm:py-8">
         <div className="my-2 grid items-start gap-8">
           <div className="group relative">
             <div className="animate-tilt absolute -inset-0.5 rounded-lg bg-gradient-to-r from-cyan-600 to-amber-500 opacity-25 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-200"></div>
