@@ -1,0 +1,155 @@
+---
+title: 'IpsumGPT: A User Guide & Dive into Causal Transformers'
+output:
+  pdf_document:
+    extra_dependencies:
+      amsmath: null
+      amssymb: null
+      graphicx: null
+      hyperref: ['colorlinks=true', 'allcolors=blue']
+      mathcal: null
+
+date: '2023-06-28'
+tags: ['transformers', 'causal-attention', 'layer-normalization']
+draft: false
+summary: 'A guide to deploying a causal transformer implementation for efficient text generation from lightweight datasets.'
+---
+
+# Why Causal Transformers?
+
+In this post, we explore the workings and utilization of [IpsumGPT](https://github.com/alexrosen45/IpsumGPT), an efficient transformer-based model that leverages causal attention
+to generate text from lightweight datasets. In attention mechanisms, a query,
+key, and value matrices are derived from the input matrix. Scaled dot-product attention calculates the attention scores as the dot product
+of the query and key matrices, which is then scaled by the square root of the dimension of the key vectors. These scores determine the
+weightage of each value in the output, capturing dependencies in our datasets while maintaining reasonable computational efficiency.
+Causal self-attention applies a mask to this process to prevent the model from peeping into future tokens in a sequence, thereby enforcing
+an order of dependence that aligns with the sequence's natural progression.
+
+### Other techniques
+
+Layer normalization and residual connections, as intriguing facets of IpsumGPT's architecture, warrant special mention.
+
+Layer normalization plays a pivotal role in stabilizing the learning process and reducing training times. During training, the distribution of layer's
+input can change as the parameters of the previous layers change, a problem known as internal covariate shift. This leads to slower training and requires
+careful initialization and smaller learning rates. Layer normalization mitigates this problem by normalizing the inputs across the features, thus making
+the learning process more stable. Unlike batch normalization, which normalizes inputs across the batch dimension, layer normalization operates freely
+of batch size, meaning each element in a batch of sequences can be treated independently.
+For instance, if we are processing a sentence one word at a time, layer normalization would allow each word's normalization to be calculated independent of words in the sentence.
+It's clear why this is (usually) advantageous when processing sequences in a causal manner.
+Layer normalization also provides a form of regularization, slightly reducing the risk of overfitting.
+
+Residual connections equip the model with the ability to learn an identity function, which helps counteract any vanishing/exploding
+gradients. They practically function as shortcuts within the network, facilitating the unimpeded flow of gradients through numerous layers without substantial modification or attenuation.
+
+# IpsumGPT: A Causal Transformer Implementation
+
+The remainder of this post is a guide on text generation with IpsumGPT.
+
+### Prerequisites
+
+- Text dataset
+- Nvidia GPU with CUDA installed
+- Anaconda (or another virtual environment for package management)
+
+### Setup
+
+It should be straightforward to modify this setup yourself for use without Anaconda.
+
+#### Clone the repository
+
+```sh
+git clone https://github.com/alexrosen45/IpsumGPT
+```
+
+#### Create and activate the IpsumGPT conda environment
+
+```sh
+cd IpsumGPT
+conda update -n base conda
+conda env create -f environment.yml
+conda activate IpsumGPT
+python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
+
+#### Install PyTorch in your conda environment
+
+Follow the setup instructions [here](https://pytorch.org/). Install version 2.0 or above with conda and CUDA 11.7 or above. If your are unsure of which CUDA version to pick, run `nvidia-smi` in your conda environment and pick the version closest to 'CUDA Version' (it shouldn't need to be exactly the same). You can install without torchvision or torchaudio, and you command should ressemble the following
+
+```sh
+conda install pytorch pytorch-cuda=11.7 -c pytorch -c nvidia
+```
+
+### Usage
+
+#### Add a dataset
+
+From the project's home directory, create a folder named `datasets` with a subdirectory `your-dataset-name-here`. Metadata, training, and testing files will be stored in this subdirectory; It's necessary to maintain the recommended file structure. Inside the subdirectory `your-dataset-name-here`, create a new folder `your-raw-data-name-here` and upload your dataset as any assortment of .txt files within this new folder.
+
+#### Data Processing
+
+Suppose your raw data is located in the directory `datasets/ipsum/ipsum-dataset`. Fetch, tokenize, and process your raw data for training with
+
+```sh
+python3 process.py \
+  --data_dir="datasets/ipsum" \
+  --data_folder="ipsum-dataset" \
+  --split_ratio=0.8
+```
+
+#### Model training
+
+Pick a name for your model and train it with
+
+```sh
+python3 train.py \
+  --out_dir="your-model-name-here" \
+  --data_dir="datasets/ipsum"
+```
+
+#### Text generation
+
+After training, use your model to sample text with
+
+```sh
+python3 generate.py \
+  --model="your-model-name-here"
+```
+
+Try poking around each file in the `arguments` folder to see how you can fine-tune any of the data processing, model training, or text generation stages.
+
+# Closing Remarks
+
+IpsumGPT uses the nonmonotonic swish activation function^[[Swish activation function](https://paperswithcode.com/method/swish)] (for control
+over its smoothness), coupled with Glorot initialization ^[[Glorot and Bengio paper](https://proceedings.mlr.press/v9/glorot10a.html)]
+to improve the speed of convergence during training and reduce the risk of getting stuck in poor local minima. Each are
+implemented as follows.
+
+```python
+def swish(x, beta=1.0):
+  """
+  This is a self-gated activation function introduced by Google.
+  beta parameter controls the smoothness of our function. When beta
+  is 1, our function behaves like ReLU.
+  """
+  sigmoid = torch.sigmoid(beta * x)
+  return x * sigmoid
+```
+
+```python
+def _initialize_weights(self):
+  """Initialize weights with Glorot initialization.
+  """
+  for m in self.modules():
+    if isinstance(m, nn.Linear):
+      torch.nn.init.xavier_uniform_(m.weight)
+      if m.bias is not None:
+        torch.nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.Embedding):
+      torch.nn.init.xavier_uniform_(m.weight)
+  for pn, p in self.named_parameters():
+    if pn.endswith('c_proj.weight'):
+      torch.nn.init.normal_(p, mean=0.0, std=0.02/math.sqrt(2 * self.n_layer))
+```
+
+Rehauling either of these code blocks is encouraged, however drawing weights from a standard normal distribution may require a bump
+training iterations to compensate for large standard deviation.
