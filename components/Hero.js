@@ -75,9 +75,7 @@ const Hero = () => {
                     Some Curated Recent Projects
                   </span>
                 </span>
-                <span className="pl-6 text-black transition duration-200 dark:text-white">
-                  Discover &rarr;
-                </span>
+                <span className="pl-6 text-black dark:text-white">Discover &rarr;</span>
               </a>
             </Link>
           </div>
