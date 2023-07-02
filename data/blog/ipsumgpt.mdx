@@ -73,7 +73,7 @@ python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'
 
 #### Install PyTorch in your conda environment
 
-Follow the setup instructions [here](https://pytorch.org/). Install version 2.0 or above with conda and CUDA 11.7 or above. If your are unsure of which CUDA version to pick, run `nvidia-smi` in your conda environment and pick the version closest to 'CUDA Version' (it shouldn't need to be exactly the same). You can install without torchvision or torchaudio, and you command should ressemble the following
+Follow the setup instructions [here](https://pytorch.org/). Install version 2.0 or above with conda and CUDA 11.7 or above. If your are unsure of which CUDA version to pick, run `nvidia-smi` in your conda environment and pick the version closest to 'CUDA Version' (it shouldn't need to be exactly the same). You can install without torchvision or torchaudio, and your command should ressemble the following
 
 ```sh
 conda install pytorch pytorch-cuda=11.7 -c pytorch -c nvidia
@@ -117,7 +117,7 @@ python3 generate.py \
 
 Try poking around each file in the `arguments` folder to see how you can fine-tune any of the data processing, model training, or text generation stages.
 
-# Closing Remarks
+# Simple Customization
 
 IpsumGPT uses the nonmonotonic swish activation function^[[Swish activation function](https://paperswithcode.com/method/swish)] (for control
 over its smoothness), coupled with Glorot initialization ^[[Glorot and Bengio paper](https://proceedings.mlr.press/v9/glorot10a.html)]
