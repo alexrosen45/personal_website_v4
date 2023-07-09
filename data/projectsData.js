@@ -9,18 +9,18 @@ const projectsData = [
   },
   {
     title: 'First Internship Project?',
-    description: `After completing high school I embarked on a journey to conquer my first software 
-    engineering internship. After wrestling a custom subscription service into place, 
-    adding authentication, and establishing communication with our network intrusion devices, out came 
-    a polished frontend, dynamically served with Django from a Nginx and Gunicorn powered server.`,
+    description: `After graduating high school, I secured my first software engineering internship. 
+    I developed a custom subscription service, implemented authentication, and established secure and
+    efficient connections with our network intrusion devices resulting in a polished frontend 
+    served by Django, powered by an Nginx and Gunicorn server.`,
     imgSrc: '/static/images/time-machine.jpg',
     href: 'https://oppossecure.com/',
   },
   {
     title: 'Hackathons',
-    description: `Participating in hackathons is an excellent way to tune your rapid product development skills.
+    description: `Participating in hackathons is an excellent way to tune your rapid software development skills.
     Here's a collection of ML focused hackathon projects that I collaborated on to design, build, and ship 
-    practical software solutions.`,
+    practical products with friends.`,
     imgSrc: '/static/images/hackathon.png',
     href: 'https://devpost.com/alexanderrosen45?ref_content=user-portfolio&ref_feature=portfolio&ref_medium=global-nav',
   },

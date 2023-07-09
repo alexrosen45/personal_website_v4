@@ -30,7 +30,7 @@ const Greeting = () => {
   )
 
   let gradientStyle = clsx(
-    'bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 dark:bg-gradient-to-l dark:from-blue-600 to-purple-600'
+    'bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600 dark:bg-gradient-to-l dark:from-blue-500 to-cyan-500'
   )
 
   return (
