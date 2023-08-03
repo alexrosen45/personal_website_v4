@@ -2,7 +2,7 @@ const siteMetadata = {
   title: "Alex Rosen's Website",
   author: 'Alex Rosen',
   headerTitle: "Alex Rosen's Website",
-  description: 'I study computer science at the University of Toronto. Welcome to my blog!',
+  description: 'I study computer science at the University of Toronto.',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',

@@ -3,35 +3,81 @@ import { useTheme } from 'next-themes'
 
 const ThemeSwitch = () => {
   const [mounted, setMounted] = useState(false)
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
 
-  // When mounted on client, now we can show the UI
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light') // Inverted logic here
+  }
+
+  if (!mounted) return null
 
   return (
-    <button
-      aria-label="Toggle Dark Mode"
-      type="button"
-      className="ml-1 mr-1 h-8 w-8 rounded p-1 sm:ml-4"
-      onClick={() => setTheme(theme === 'dark' || resolvedTheme === 'dark' ? 'light' : 'dark')}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        className="text-gray-900 dark:text-gray-100"
-      >
-        {mounted && (theme === 'dark' || resolvedTheme === 'dark') ? (
-          <path
-            fillRule="evenodd"
-            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-            clipRule="evenodd"
-          />
-        ) : (
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-        )}
-      </svg>
-    </button>
+    <div className="theme-switch">
+      <div className={`tdnn ${theme === 'light' ? 'day' : ''}`} onClick={toggleTheme}>
+        <div className={theme === 'dark' ? 'moon' : 'sun'}></div>
+      </div>
+      <style jsx global>{`
+        .theme-switch {
+          display: flex;
+          align-items: center; // Vertically aligns the child elements
+          justify-content: center; // Horizontally aligns the child elements
+          height: 9em; // 10% less than before
+          font-size: 30%; // 10% less than before
+        }
+        .tdnn {
+          margin: 0 auto;
+          margin-top: 1.5em; // 10% less than before
+          position: relative;
+          height: 4.8em; // 10% less than before
+          width: 9em; // 10% less than before
+          border-radius: 4.8em; // 10% less than before
+          transition: all 500ms ease-in-out;
+          background: #423966;
+        }
+        .day {
+          background: #ffbf71;
+        }
+        .moon,
+        .sun {
+          position: absolute;
+          border-radius: 50%;
+          transition: all 400ms ease-in-out;
+          width: 3em; // 10% less than before
+          height: 3em; // 10% less than before
+        }
+        .moon {
+          top: 0.9em; // 10% less than before
+          left: 0.9em; // 10% less than before
+          transform: rotate(-75deg);
+          background: #423966;
+          box-shadow: 0.9em 0.75em 0 0em #d9fbff inset,
+            rgba(255, 255, 255, 0.1) 0em -2.1em 0 -1.35em,
+            rgba(255, 255, 255, 0.1) 0.9em 2.1em 0 -1.35em,
+            rgba(255, 255, 255, 0.1) 0.6em 3.9em 0 -1.2em,
+            rgba(255, 255, 255, 0.1) 1.8em 0.6em 0 -1.23em,
+            rgba(255, 255, 255, 0.1) 2.4em 2.4em 0 -1.35em,
+            rgba(255, 255, 255, 0.1) 1.8em 3.9em 0 -1.35em,
+            rgba(255, 255, 255, 0.1) -1.2em 2.1em 0 -1.35em,
+            rgba(255, 255, 255, 0.1) -0.3em 3em 0 -1.35em;
+        }
+        .sun {
+          top: 1.35em; // 10% less than before
+          left: 5.4em; // 10% less than before
+          transform: rotate(0deg);
+          width: 2.1em; // 10% less than before
+          height: 2.1em; // 10% less than before
+          background: #fff;
+          box-shadow: 0.9em 0.9em 0 1.5em #fff inset, 0 -1.5em 0 -0.81em #fff,
+            1.05em -1.05em 0 -0.9em #fff, 1.5em 0 0 -0.81em #fff, 1.05em 1.05em 0 -0.9em #fff,
+            0 1.5em 0 -0.81em #fff, -1.05em 1.05em 0 -0.9em #fff, -1.5em 0 0 -0.81em #fff,
+            -1.05em -1.05em 0 -0.9em #fff;
+        }
+      `}</style>
+    </div>
   )
 }
 
