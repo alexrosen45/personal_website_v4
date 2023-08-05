@@ -16,7 +16,7 @@ const ThemeSwitch = () => {
   if (!mounted) return null
 
   return (
-    <div className="theme-switch">
+    <div className="theme-switch mt-[-1.1em] pl-4">
       <div className={`tdnn ${theme === 'light' ? 'day' : ''}`} onClick={toggleTheme}>
         <div className={theme === 'dark' ? 'moon' : 'sun'}></div>
       </div>

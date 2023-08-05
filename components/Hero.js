@@ -48,12 +48,12 @@ const Hero = () => {
         <Greeting />
         <TypingText text={siteMetadata.description} />
       </div>
-      <div className="order-1 grid w-full grid-cols-1 gap-8 pb-1 sm:order-2 sm:w-1/2 sm:py-8">
+      <div className="order-1 grid hidden w-full grid-cols-1 gap-8 pb-1 sm:order-2 sm:block sm:w-1/2 sm:py-8">
         <div className="my-2 grid items-start gap-8">
           <div className="group relative">
             <div className="animate-tilt absolute -inset-0.5 rounded-lg bg-gradient-to-r from-cyan-600 to-amber-500 opacity-25 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-200"></div>
-            <Link href="/projects">
-              <a className="relative hidden items-center divide-x divide-gray-900 rounded-lg bg-white px-7 py-4 leading-none shadow-md dark:divide-white dark:bg-gray-800 sm:flex">
+            <Link href="https://github.com/alexrosen45?tab=repositories">
+              <a className="relative hidden items-center divide-x divide-gray-900 rounded-lg bg-white px-7 py-4 leading-none shadow-md dark:divide-white dark:bg-gray-900 sm:flex">
                 {' '}
                 {/* Change here */}
                 <span className="flex items-center justify-between">
@@ -72,7 +72,7 @@ const Hero = () => {
                     />
                   </svg>
                   <span className="pr-6 text-gray-700 dark:text-white">
-                    Some Curated Recent Projects
+                    Some projects, work, and research
                   </span>
                 </span>
                 <span className="pl-6 text-black dark:text-white">Discover &rarr;</span>
