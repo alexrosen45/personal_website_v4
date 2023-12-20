@@ -1,0 +1,23 @@
+{
+  "locale": "en-US",
+  "id": "apa",
+  "title": "APA",
+  "in-text-citations": {
+    "suppress-author": false,
+    "suppress-title": false,
+    "prefix": "(",
+    "suffix": ")",
+    "page": "p.",
+    "et-al-min": 3,
+    "et-al-use-first": 3
+  },
+  "bibliography": {
+    "entry-format": "apa",
+    "entry-spacing": 0,
+    "title": "References",
+    "page-range-format": "expanded",
+    "line-spacing": 2,
+    "margin-left": 0,
+    "margin-right": 0
+  }
+}
