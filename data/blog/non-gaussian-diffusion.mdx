@@ -20,9 +20,7 @@ bibliography: non-gaussian-diffusion.bib
 
 Latent Diffusion Models (LDMs) [@2112-10752] have emerged as a prominent class of generative models, offering a novel approach to synthesizing high-quality data across various domains, including images, audio, and text. At the heart of LDMs lies the concept of a diffusion process [@Sohl-DicksteinW15], a mechanism typically governed by a Markov chain that gradually transforms data into noisier representations; eventually, approximately isotropic Gaussian noise [@Sohl-DicksteinW15]. The reverse of this process, which involves iteratively denoising the data, is used for generation.
 
-Non-Gaussian noise in diffusion models can be advantageous for several reasons. First, it allows the model to capture a broader range of data distributions, which might not be well-represented by Gaussian noise alone. This could be particularly relevant in cases where training data exhibits heavy-tailed or multimodal characteristics. Non-Gaussian noise may be able to better mimic these properties, leading to more diverse generation. Additionally, using different types of noise can aid in overcoming limitations associated with Gaussian noise, such as the tendency to smooth out sharp features or details. This is crucial in applications like image and audio generation, where preserving fine-grained details is essential for high-quality outputs. Moreover, experimenting with various noise distributions can potentially improve the robustness of the model, making it more adaptable to different types of data and enhancing its overall performance in generating complex and high-dimensional outputs.
-
-So, we will demonstrate evidence that incorporating non-Gaussian noise in diffusion models, like LDMs and Denoising Diffusion Probabilistic Models (DDPMs) [@2006-11239], may enhance their ability to generate more diverse and fine-grain outputs.
+Non-Gaussian noise in diffusion models (DMs) capture a broader range of data distributions, which might not be well-represented by Gaussian noise alone. This could be particularly relevant in cases where training data exhibits heavy-tailed or multimodal characteristics. Using different types of noise can aid in overcoming limitations associated with Gaussian noise, such as the tendency to smooth out sharp features or details. This is crucial in applications like image and audio generation, where preserving fine-grained details is essential for high-quality outputs.
 
 # Background
 
@@ -32,38 +30,39 @@ Suppose we begin with an element of our training set $x^{(0)}$. Over $T$ steps, 
 
 $$
 \displaystyle
-    x^{(t)}_i=\sqrt{1-\beta_t}x^{(t-1)}_i+\sqrt{\beta_t}\epsilon_t
+    x^{(t)}_i=\sqrt{1-\beta_t}x^{(t-1)}_i+\sqrt{\beta_t}\epsilon_t\tag{1}
 $$
 
 for $\epsilon_t \overset{\text{iid}}{\sim} q$ to gradually add noise to $x^{(0)}$. We formulate this problem with the goal of finding the reverse distribution $p(x^{(t-1)}|x^{(t)})$ to reproduce $x^{(0)}$ from random noise.
-Applying Bayes' rule is computationally intractable. Instead, since it can be shown that $p$ is Gaussian given $q$ is Gaussian [@Sohl-DicksteinW15], we can approximate $p$ by learning a function $p_{\theta}$, a neural network $f=(f_{\mu},f_{\Sigma})$ to parameterize the reverse Gaussian distribution. That is,
+
+Applying Bayes' rule is computationally intractable. Instead, since it can be shown that $p$ is Gaussian given $q$ is Gaussian [@Sohl-DicksteinW15], we can approximate the reverse distribution $p$ by learning the parameters to $p_{\theta}$ through some neural network $f=(f_{\mu},f_{\Sigma})$. That is,
 
 $$
-    p_{\theta}(x^{(t-1)}|x^{(t)})\triangleq\mathcal{N}(x^{(t-1)};f_{\mu}(x^{(t)},t),f_{\Sigma}(x^{(t)},t))
+    p_{\theta}(x^{(t-1)}|x^{(t)})\triangleq\mathcal{N}(x^{(t-1)};f_{\mu}(x^{(t)},t),f_{\Sigma}(x^{(t)},t))\tag{2}
 $$
 
 To aid the learning process, we also make the variance of $q$ at each step $t$ a function of the Beta schedule (called a variance schedule [@Sohl-DicksteinW15]), giving our neural network more information about the distribution which produced $x^{(t)}$.
 
-Several modern approaches [@2011-13456; @2006-11239; @2102-09672] skip explicit parameterization and use a U-Net (dimension preserving CNN) [@RonnebergerFB15] to predict the noise $\epsilon$ itself, sometimes utilizing an autoencoder to denoise in a latent space [@2112-10752]. We take this a step further; what patterns emerge when we employ non-Gaussian noise?
+Several modern approaches [@2011-13456; @2006-11239; @2102-09672] skip explicit parameterization and use a U-Net (dimension preserving CNN) [@RonnebergerFB15] to predict the noise $\epsilon$ itself, sometimes utilizing an autoencoder to denoise in a latent space [@2112-10752]. Let's take this a step further; what patterns emerge when we employ different kinds of noise?
 
 ## DDPMs
 
 Diffusion in a latent space (LDMs) is relatively self-explanatory dimensionality reduction, so we focus on understanding DDPMs for arbitrary distributions instead. For shorthand, call $\alpha_t=1-\beta_t$ and $\overline{a_t}=\prod_{i=1}^t a_i$. Now, for some distribution $\mathcal{D}$, we can write
 
 $$
-    q(x^{(t)}|x^{(t-1)})=\mathcal{D}(x^{(t)};\sqrt{\overline{\alpha}_t}x^{(0)},(1-\overline{\alpha}_t)\Bbb{I})
+    q(x^{(t)}|x^{(t-1)})=\mathcal{D}(x^{(t)};\sqrt{\overline{\alpha}_t}x^{(0)},(1-\overline{\alpha}_t)\Bbb{I})\tag{3}
 $$
 
-Given the noise $\epsilon$ at timestep $t$, DDPMs aim to predict a function $\epsilon_{\theta_2}$ that takes coupled values $\sqrt{\overline{a}_t}x_0+\sqrt{1-\overline{a}_t}\epsilon$ and $t$ to some denoising space [@2006-11239; @2102-09672]. We write this distribution $\mathcal{D}$ as arbitrary for consistency with our new methodology. We also use $\theta_2$ to denote the weights of this denoising function to later introduce an autoencoder with parameters $\theta_1$. This leaves us with the prediction (corresponding to equation (3))
+Given the noise $\epsilon$ at timestep $t$, DDPMs aim to predict a function $\epsilon_{\theta_2}$ that takes coupled values $\sqrt{\overline{a}_t}x_0+\sqrt{1-\overline{a}_t}\epsilon$ and $t$ to some denoising space [@2006-11239; @2102-09672]. $\theta_2$ denotes the weights of this denoising function to later introduce an autoencoder with parameters $\theta_1$. This leaves us with
 
 $$
-    f_{\mu}(x^{(t)},t)=\frac{1}{\sqrt{\overline{a}_t}}\left( x^{(t)}-\frac{\beta_t}{\sqrt{1-\overline{a}_t}}\epsilon_{\theta_2}(x^{(t)},t) \right)
+    f_{\mu}(x^{(t)},t)=\frac{1}{\sqrt{\overline{a}_t}}\left( x^{(t)}-\frac{\beta_t}{\sqrt{1-\overline{a}_t}}\epsilon_{\theta_2}(x^{(t)},t) \right)\tag{4}
 $$
 
 and so we predict
 
 $$
-    \hat{x}^{(t)}=\frac{1}{\sqrt{\overline{a}_t}}\left( x^{(t)}-\frac{\beta_t}{\sqrt{1-\overline{a}_t}}\epsilon_{\theta_2}(x^{(t)},t) \right) + \nu_{\mathcal{D}}(\beta_t,t) z
+    \hat{x}^{(t)}=\frac{1}{\sqrt{\overline{a}_t}}\left( x^{(t)}-\frac{\beta_t}{\sqrt{1-\overline{a}_t}}\epsilon_{\theta_2}(x^{(t)},t) \right) + \nu_{\mathcal{D}}(\beta_t,t) z\tag{5}
 $$
 
 for variance schedule $\nu_{\mathcal{D}}(\beta_t,t)$ and $z\sim \mathcal{D}$. Previously, this was $\sigma_t z$ for $z\sim \mathcal{N}(0,1)$ and the standard deviation of the forward distribution $\sigma_t$, typically $\sigma_t=\sqrt{\beta_t}$ [@2006-11239].
@@ -76,18 +75,24 @@ The difficulty in comparing DMs with different noise distributions is dealing wi
 
 #### Theorem.
 
-Let $q_1,q_2:\Bbb{R}\mapsto \Bbb{R}$ be two probability distributions with mean zero. If we require $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ to be a monotonic sequence for the variance schedules $\nu_1$ and $\nu_2$ of $q_1$ and $q_2$ defined over compact sets, then
+_Let $q_1,q_2:\Bbb{R}\mapsto \Bbb{R}$ be two probability distributions with mean zero. If $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ is a monotonic sequence for the variance schedules $\nu_1$ and $\nu_2$ of $q_1$ and $q_2$ defined over compact sets, then_
 
 $$
-    \Bbb{E}_{q_1}\left[d\left(x^{(0)}-x^{(T)}_{q_1}\right)\right]\Big/ \Bbb{E}_{q_2}\left[d\left(x^{(0)}-x^{(T)}_{q_2}\right)\right]
+    \Bbb{E}_{q_1}\left[d\left(x^{(0)}-x^{(T)}_{q_1}\right)\right]\Big/ \Bbb{E}_{q_2}\left[d\left(x^{(0)}-x^{(T)}_{q_2}\right)\right]\tag{6}
 $$
 
-exists as $T\to\infty$ for any metric $d$ that induces the same topology as the Euclidean norm.
+_exists as $T\to\infty$ for any metric $d$ that induces the same topology as the Euclidean norm._
 
-_Proof._ By the equivalence of norms, it suffices to prove the Euclidean case. Since $Var_{q_1}(x_{q_1}^{(T)})/Var_{q_2}(x_{q_2}^{(T)})\to c$ for a ratio of coefficients $c\in \mathbb{R}$, $q_1$ and $q_2$ have asymptotically equivalent Beta schedules up to a constant factor. Then, substituting $\mathbb{E}[x^{(T)}]=0$ in (1), we have an upper bound on the quotient in (7) for every $T$. So, the monotonicity of $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ and the compactness of the domains of both variance schedulers is enough for the limit to exist.
+_Proof._ By the equivalence of norms, it suffices to prove the Euclidean case. Since
+
+$$
+    Var_{q_1}(x_{q_1}^{(T)})/Var_{q_2}(x_{q_2}^{(T)})\to c\tag{7}
+$$
+
+for a ratio of coefficients $c\in \mathbb{R}$, $q_1$ and $q_2$ have asymptotically equivalent Beta schedules up to a constant factor. Then, substituting $\mathbb{E}[x^{(T)}]=0$ into (1), we have an upper bound on the quotient in (6) for every $T$. So, the monotonicity of $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ and the compactness of the domains of both variance schedulers is enough for the limit to exist.
 Note that even though we only desire non-decreasing variance schedules, the sequence above may not be. Introducing a more general metric allows for broader interpretations of what it means for outputs to have similar noise.
 
-Thus, with a large number of timesteps, we expect similar noise for an arbitrary collection of distributions with (usually constant, linear or quadratic) variance schedules that satisfy the assumptions of Theorem 1. Implementations should apply normalization to ensure (7) evaluates to one (see Appendix B).
+So, with a large number of timesteps, we expect similar noise for an arbitrary collection of distributions with (usually constant, linear or quadratic) variance schedules that satisfy the assumptions of Theorem 1. Implementations should apply normalization so (6) evaluates to one.
 
 ## Architecture
 
@@ -104,17 +109,13 @@ NGLDMs perform DDPM-style diffusion using a U-Net. But, we now sample from the a
 
 Algorithms 1 and 2 are enhancements of the DDPM training and sampling algorithms; the objective function is identical.
 
-We do not derive this objective function by showing that it maximizes a variational lower bound on likelihood since the distributions we use do not change the derivations found in the original DDPM paper [@2006-11239]. Instead, we remark on important changes. First, we immediately encode $x\overset{\mathscr{\epsilon}_{\theta_1}}{\to}\text{U-Net input}$. Then, we uniformly sample a timestep to generate noise for. Recall that $\nu_\mathcal{D}$ denotes the variance schedule for our selected distribution. Using Theorem 1, we make $\nu_{\mathcal{D}}$ a function of a polynomial Beta schedule, and recommend that this polynomial be of low degree to match the intuition behind adding noise gradually to our latent input. Finally, we use mean squared error loss to minimize the distance between $\epsilon_{\theta_2}$ and the noise added to our input in now a single step (4).
+We immediately encode $x\overset{\mathscr{\epsilon}_{\theta_1}}{\to}$ U-Net input. Then, we uniformly sample a timestep to generate noise for. Using Theorem 1, we make $\nu_{\mathcal{D}}$ a function of a polynomial Beta schedule, and recommend that this polynomial be of low degree to match the intuition behind adding noise gradually to our latent input. Finally, we use mean squared error loss to minimize the distance between $\epsilon_{\theta_2}$ and the noise added to our input in a single step (3).
 
-The sampling algorithm repeats the prediction (6) for all $T$ timesteps. We then return the decoded prediction back at timestamp zero. It's important to note that at timestamp zero, we apply the constraint $v_{\mathcal{D}}(\beta_0,0)\approx 0$ since our predictions should be nearing 'full-denoise' at this point.
+The sampling algorithm repeats the prediction (5) for all $T$ timesteps. We then return the decoded prediction back at timestamp zero. It's important to note that at timestamp zero, we apply the constraint $v_{\mathcal{D}}(\beta_0,0)\approx 0$ since our predictions should be nearing 'full-denoise' at this point.
 
 ## Autoencoder
 
-For high-dimensional datasets, we recommend using a pre-trained autoencoder (learning one simultaneously with the U-Net is not addressed in this paper and defeats the purpose of introducing an autoencoder). The choice of autoencoder should be dealt with on a case-by-case basis to ensure necessary information is retained in the latent space. For example, we recommend that image data be taken from a tensor of (batch size) $\times$ (height) $\times$ (width) $\times$ (color channels) to a tensor of (batch size) $\times$ (new dimension) $\times$ (color channels). We use an autoencoder to avoid dealing with learning both a good latent representation of our inputs and a successful denoising process simultaneously.
-
-## U-Net Architecture
-
-Our U-Net implementation is a variation on that found in Figure 1b characterized by double convolutional layers and self-attention mechanisms, enhancing its capability to capture complex image patterns. Positional encoding is integrated to maintain temporal context in the diffusion sequence. The architecture's downsampling path distills inputs into a feature-rich representation, while the upsampling path reconstructs the denoised image from these abstract features. This symmetry ensures fidelity in the reconstructed outputs (usually images). We also make use of Siren activations [@2006-09661], on account of their results for inpainting. As previously mentioned, we modify the original U-Net implementation to use MSE loss.
+For high-dimensional datasets, one should use a pre-trained autoencoder to avoid dealing with learning a good latent representation of inputs and a successful denoising process simultaneously. The choice of autoencoder should be dealt with on a case-by-case basis to ensure necessary information is retained in the latent space. For example, image data should be taken from a (batch size) $\times$ (height) $\times$ (width) $\times$ (color channels) tensor to a tensor of (batch size) $\times$ (new dimension) $\times$ (color channels).
 
 # Experiments and Evaluation
 
@@ -123,21 +124,22 @@ Our U-Net implementation is a variation on that found in Figure 1b characterized
 To measure the similarity between our original and generated images, we use the Fréchet Inception Distance (FID) score [@HeuselRUNKH17]
 
 $$
-    FID=\norm{\mu_1-\mu_2}^2_2+tr(\Sigma_1+\Sigma_2+2\sqrt{\Sigma_1 \Sigma_2})
+    FID=||{\mu_1-\mu_2}||^2_2+tr(\Sigma_1+\Sigma_2+2\sqrt{\Sigma_1 \Sigma_2})
 $$
 
 where $\mu_1,\mu_2,\Sigma_1,\Sigma_2$ are the feature-wise mean and covariance matrices of the original and generated images, respectively. We use InceptionV3 [@SzegedyVISW15] as a feature extractor and evaluate FID scores according to the mean and covariance matrices of the feature vectors from the final layer of this model. This has become standard for recent evaluations of DMs, with lower scores signifying a generative process that does a better job emulating the test set.
 
+## Setup
+
+The U-Net implementation is characterized by double convolutional layers and self-attention mechanisms. Positional encoding is integrated to maintain temporal context in the diffusion sequence. Siren activations [@2006-09661] are used on account of their results for inpainting.
+
+Since it's computationally infeasible to perform a grid search for the optimal variance schedule for each of the five distributions in Table 1, each distribution has fixed variance 1. We use hyperparameters optimal for Gaussian noise; a total number of $T=1000$ timesteps, and a linear Beta schedule from $\beta_1=10^{-4}$ to $\beta_T=0.02$ [@2006-11239]. Each model was trained with a batch size of 10 over 200 epochs.
+
 ## Results
 
-For the empirical results presented, our architecture is identical to that defined in the Methodology section. Since it's computationally infeasible to perform a grid search for the optimal variance schedule for each of the five distributions in Table 1, we fix each distribution to have variance 1. We also use hyperparameters optimal for Gaussian noise; a total number of $T=1000$ timesteps, and a linear Beta schedule from $\beta_1=10^{-4}$ to $\beta_T=0.02$ [@2006-11239]. Each model was trained with a batch size of 10 over 200 epochs.
-
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
-  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+<div align="center">
+  <div className="xl:w-1/2" align="center">
     ![Table1](/static/blog/non-gaussian-diffusion/table1.png)
-  </div>
-  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
-    ![Table2](/static/blog/non-gaussian-diffusion/table2.png)
   </div>
 </div>
 
@@ -152,25 +154,15 @@ We trained each model on the CIFAR-10 dataset (10 classes with 6000 $32\times 32
   </div>
 </div>
 
-Table 2 shows the FID scores at epoch 195 for the five distributions we chose, and Figure 2 shows the FID scores for the Gaussian, Laplace, Uniform and Gumbel distributions. We separate the FID scores for the Exponential distribution into Figure 3 since they are too large to be included on the same scale; this was somewhat expected due to the nature of the family of Exponential distributions. See Table 3 (Appendix) for the FID scores corresponding to Figures 2 and 3. FID scores were calculated using 1000 randomly generated images and 1000 randomly sampled training images, per epoch, per distribution.
+Table 1 shows the FID scores at epoch 195 for the five distributions we chose, and Figure 2 shows the FID scores for the Gaussian, Laplace, Uniform and Gumbel distributions. We separate the FID scores for the Exponential distribution into Figure 3 since they are too large to be included on the same scale; this was somewhat expected due to the nature of the family of Exponential distributions. See Table 3 (Appendix) for the FID scores corresponding to Figures 2 and 3. FID scores were calculated using 1000 randomly generated images and 1000 randomly sampled training images, per epoch, per distribution.
 
 ![Progress](/static/blog/non-gaussian-diffusion/progress.png)
 
 The Gaussian process leads with the lowest FID score among the five distributions. Following in second is the Laplace process. Gumbel and Uniform are third and fourth respectively, while Exponential is last by multiple orders of magnitude. These numerical rankings reflect qualitative results left to the Appendix (Figures 9 through 19). Gaussian samples appear the most realistic while Laplace seems to produce smeary, but sharper, recognizable visual forms. Uniform and Gumbel samples are less coherent, and the Exponential samples are nearly black.
 
-## Limitations
+# Takeaways
 
-Overreliance on metrics like FID score evaluation with InceptionV3 may lead to an incomplete and unfair evaluation of generative, specifically diffusion, models [@stein2023exposing]. Correspondingly, the InceptionV3 model used to evaluate FID scores was originally trained on $299\times 299$ images [@SzegedyVISW15]. As a result, we had to interpolate our inputs to higher-dimensions, which could have unpredictable effects on the feature vectors we extract. We also do not sample images class conditionally, which may affect the stability of changes in FID scores over epochs in Figures 2 and 3. Lastly, our method of evaluation only fed 1000 pairs of dataset and generated images to InceptionV3 due to computational limitations. However, since the results we provide are specific to this paper, and we do not claim to achieve a state-of-the-art FID score, this issue is exceedingly minor.
-
-The Beta schedules used in this paper were not fine tuned (up to a constant factor) for non-Gaussian distributions. This may have hindered the ability of other distributions to match the performance of the Gaussian on the hyperparameters we chose. Ideally, for each distribution, one should search for an optimal Beta schedule and total number of timesteps within the scope of Theorem 1.
-
-This paper does not address non-monotonic Beta schedules like the seminal work on cosine schedules for Improved DDPMs [@2102-09672].
-
-The final limitation of our results is the use of a specific autoencoder and dataset. Even though our dataset is common practice, diffusion models are usually tailored to generating images with much higher resolution than $32\times 32$ pixels. Moreover, it's extremely difficult to determine the extent to which our choice of autoencoder has impacted the results in Tables 2 and 3 (Appendix).
-
-# Conclusion
-
-Determining the best type of noise for a DM using a validation set is computationally expensive for state-of-the-art architectures. However, our work demonstrates the importance of lending equal attention to a multitude of noise distributions.
+Determining the best type of noise for a DM using a validation set is computationally expensive for state-of-the-art architectures. Regardless, these results demonstrate the importance of lending equal attention to a multitude of noise distributions.
 
 <div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
   <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
@@ -181,6 +173,6 @@ Determining the best type of noise for a DM using a validation set is computatio
   </div>
 </div>
 
-At first glance, it may seem that Tables 2 and 3 show that Gaussian distributions should always be used for DDPM-related diffusion processes in a latent space. But, since we use a Beta schedule and number of timesteps fine-tuned for the Gaussian distribution, the takeaway should be that Non-Gaussian distributions have considerable of promise -- after normalization, they perform surprisingly well on an arbitrary hyperparameter set. The Laplace distribution, in particular, seems to be an excellent candidate for further research. Going forward, we postulate that if suitable resources are dedicated to diffusion with certain non-Gaussian distributions, there will be strong empirical results that match or exceed the performace of Gaussian noise.
+At first glance, it may seem that Table 1 shows that Gaussian distributions should always be used for DDPM-related diffusion processes in a latent space. But, since we use a Beta schedule and number of timesteps fine-tuned for the Gaussian distribution, the takeaway should be that Non-Gaussian distributions have considerable of promise -- after normalization, they perform surprisingly well on an arbitrary hyperparameter set. The Laplace distribution, in particular, seems to be an excellent candidate for further research. Going forward, we postulate that if suitable resources are dedicated to diffusion with certain non-Gaussian distributions, there will be strong empirical results that match or exceed the performace of Gaussian noise.
 
 **References:**
