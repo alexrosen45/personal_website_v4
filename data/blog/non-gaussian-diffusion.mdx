@@ -16,6 +16,10 @@ summary: 'Challenging the common practice of Gaussian noise sampling for diffusi
 bibliography: non-gaussian-diffusion.bib
 ---
 
+<TOCInline toc={props.toc} indentDepth={4} fromHeading={1} toHeading={3} asDisclosure />
+
+The following is a summary of a [paper](https://github.com/alexrosen45/NGLDM) I wrote, exploring non-Gaussian noise for diffusion models.
+
 # Introduction
 
 Latent Diffusion Models (LDMs) [@2112-10752] have emerged as a prominent class of generative models, offering a novel approach to synthesizing high-quality data across various domains, including images, audio, and text. At the heart of LDMs lies the concept of a diffusion process [@Sohl-DicksteinW15], a mechanism typically governed by a Markov chain that gradually transforms data into noisier representations; eventually, approximately isotropic Gaussian noise [@Sohl-DicksteinW15]. The reverse of this process, which involves iteratively denoising the data, is used for generation.
@@ -26,14 +30,14 @@ Non-Gaussian noise in diffusion models (DMs) capture a broader range of data dis
 
 ## Diffusion
 
-Suppose we begin with an element of our training set $x^{(0)}$. Over $T$ steps, we define a Markov chain producing noisier and noisier samples $x^{(0)},\ldots,x^{(T)}$ using a (typically Gaussian) distribution $q(x^{(t)}|x^{(t-1)})$. We learn or specify a Beta schedule $\{\beta_T\}_{t=1}^T$ and calculate
+Suppose we begin with an element of our training set $x^{(0)}$. Over $T$ steps, we define a Markov chain producing noisier and noisier samples $x^{(0)},\ldots,x^{(T)}$ using a (typically Gaussian) distribution $q(x^{(t)}|x^{(t-1)})$. We learn or specify a sequence of coefficients called a Beta schedule $\{\beta_T\}_{t=1}^T$ and calculate
 
 $$
 \displaystyle
     x^{(t)}_i=\sqrt{1-\beta_t}x^{(t-1)}_i+\sqrt{\beta_t}\epsilon_t\tag{1}
 $$
 
-for $\epsilon_t \overset{\text{iid}}{\sim} q$ to gradually add noise to $x^{(0)}$. We formulate this problem with the goal of finding the reverse distribution $p(x^{(t-1)}|x^{(t)})$ to reproduce $x^{(0)}$ from random noise.
+for $\epsilon_t \sim q$ to gradually add noise to $x^{(0)}$. We formulate this problem with the goal of finding the reverse distribution $p(x^{(t-1)}|x^{(t)})$ to reproduce $x^{(0)}$ from random noise.
 
 Applying Bayes' rule is computationally intractable. Instead, since it can be shown that $p$ is Gaussian given $q$ is Gaussian [@Sohl-DicksteinW15], we can approximate the reverse distribution $p$ by learning the parameters to $p_{\theta}$ through some neural network $f=(f_{\mu},f_{\Sigma})$. That is,
 
@@ -73,9 +77,9 @@ for variance schedule $\nu_{\mathcal{D}}(\beta_t,t)$ and $z\sim \mathcal{D}$. Pr
 
 The difficulty in comparing DMs with different noise distributions is dealing with fair amounts of noise creation; under arbitrary variance schedules, it's unclear whether $x^{(T)}$ will be 'pure noise' for all distributions. To deal with this, we build off the work on variance schedulers in the first diffusion paper [@Sohl-DicksteinW15], generalizing linear and quadratic variance schedulers to arbitrary distributions (with finite mean and variance).
 
-#### Theorem.
+#### Theorem 1.
 
-_Let $q_1,q_2:\Bbb{R}\mapsto \Bbb{R}$ be two probability distributions with mean zero. If $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ is a monotonic sequence for the variance schedules $\nu_1$ and $\nu_2$ of $q_1$ and $q_2$ defined over compact sets, then_
+_Let $q_1,q_2:\Bbb{R}\mapsto \Bbb{R}$ be two probability distributions with mean zero. If $\{\tfrac{\nu_1(t)}{\nu_2(t)}\}_{t=0}^T$ is a monotonic sequence for the variance schedules $\nu_1$ and $\nu_2$ of $q_1$ and $q_2$ defined over compact sets, then\_
 
 $$
     \Bbb{E}_{q_1}\left[d\left(x^{(0)}-x^{(T)}_{q_1}\right)\right]\Big/ \Bbb{E}_{q_2}\left[d\left(x^{(0)}-x^{(T)}_{q_2}\right)\right]\tag{6}
@@ -143,7 +147,7 @@ Since it's computationally infeasible to perform a grid search for the optimal v
   </div>
 </div>
 
-We trained each model on the CIFAR-10 dataset (10 classes with 6000 $32\times 32$ images per class), and chose a CNN autoencoder that takes these images from a $10\times 32\times 32\times 3$ dimensional to a $10\times 24\times 24\times 3$ dimensional space with small reconstruction error. We do not use class-conditional sampling, meaning our results are for an entirely unsupervised process.
+Each model was trained on the CIFAR-10 dataset (10 classes with 6000 $32\times 32$ images per class), aided by an autoencoder that took these images from a $10\times 32\times 32\times 3$ dimensional to a $10\times 24\times 24\times 3$ dimensional space with small reconstruction error. Sampling is not class-conditional, meaning the results shown are from an entirely unsupervised process.
 
 <div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
   <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
@@ -154,11 +158,11 @@ We trained each model on the CIFAR-10 dataset (10 classes with 6000 $32\times 32
   </div>
 </div>
 
-Table 1 shows the FID scores at epoch 195 for the five distributions we chose, and Figure 2 shows the FID scores for the Gaussian, Laplace, Uniform and Gumbel distributions. We separate the FID scores for the Exponential distribution into Figure 3 since they are too large to be included on the same scale; this was somewhat expected due to the nature of the family of Exponential distributions. See Table 3 (Appendix) for the FID scores corresponding to Figures 2 and 3. FID scores were calculated using 1000 randomly generated images and 1000 randomly sampled training images, per epoch, per distribution.
+Table 1 shows the FID scores at epoch 195 for all five distributions chosen, and Figure 2 shows the FID scores for the Gaussian, Laplace, Uniform and Gumbel distributions. The FID scores for the Exponential distribution were separated into Figure 3 since they are too large to be included on the same scale; this was somewhat expected due to the nature of the family of Exponential distributions. FID scores were calculated using 1000 randomly generated images and 1000 randomly sampled training images, per epoch, per distribution.
 
 ![Progress](/static/blog/non-gaussian-diffusion/progress.png)
 
-The Gaussian process leads with the lowest FID score among the five distributions. Following in second is the Laplace process. Gumbel and Uniform are third and fourth respectively, while Exponential is last by multiple orders of magnitude. These numerical rankings reflect qualitative results left to the Appendix (Figures 9 through 19). Gaussian samples appear the most realistic while Laplace seems to produce smeary, but sharper, recognizable visual forms. Uniform and Gumbel samples are less coherent, and the Exponential samples are nearly black.
+The numerical rankings shown reflect qualitative results above ([more](https://github.com/alexrosen45/NGLDM)). Gaussian samples appear the most realistic while Laplace samples seem to produce smeary, but sharper, recognizable visual forms. Uniform and Gumbel samples are less coherent, and the Exponential samples are nearly black.
 
 # Takeaways
 
@@ -173,6 +177,6 @@ Determining the best type of noise for a DM using a validation set is computatio
   </div>
 </div>
 
-At first glance, it may seem that Table 1 shows that Gaussian distributions should always be used for DDPM-related diffusion processes in a latent space. But, since we use a Beta schedule and number of timesteps fine-tuned for the Gaussian distribution, the takeaway should be that Non-Gaussian distributions have considerable of promise -- after normalization, they perform surprisingly well on an arbitrary hyperparameter set. The Laplace distribution, in particular, seems to be an excellent candidate for further research. Going forward, we postulate that if suitable resources are dedicated to diffusion with certain non-Gaussian distributions, there will be strong empirical results that match or exceed the performace of Gaussian noise.
+At first glance, it may seem that Table 1 shows that Gaussian distributions should always be used for DDPM-related diffusion processes in a latent space. But, since we use a Beta schedule and number of timesteps fine-tuned for the Gaussian distribution, this in fact alludes to the considerable promise of Non-Gaussian sampling for DMs – after normalization, they perform surprisingly well on an arbitrary hyperparameter set. The Laplace distribution, in particular, seems to be an excellent candidate for further research. Going forward, if suitable resources are dedicated to diffusion with certain non-Gaussian distributions, there may be strong empirical results that match or exceed the performace of Gaussian noise.
 
 **References:**
