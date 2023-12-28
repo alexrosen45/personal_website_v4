@@ -10,7 +10,7 @@ const ThemeSwitch = () => {
   }, [])
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light') // Inverted logic here
+    setTheme(theme === 'light' ? 'dark' : 'light')
   }
 
   if (!mounted) return null
@@ -18,23 +18,23 @@ const ThemeSwitch = () => {
   return (
     <div className="theme-switch mt-[-1.1em] pl-4">
       <div className={`tdnn ${theme === 'light' ? 'day' : ''}`} onClick={toggleTheme}>
-        <div className={theme === 'dark' ? 'moon' : 'sun'}></div>
+        <div className={theme === 'light' ? 'sun' : 'moon'}></div>
       </div>
       <style jsx global>{`
         .theme-switch {
           display: flex;
-          align-items: center; // Vertically aligns the child elements
-          justify-content: center; // Horizontally aligns the child elements
-          height: 9em; // 10% less than before
-          font-size: 30%; // 10% less than before
+          align-items: center;
+          justify-content: center;
+          height: 9em;
+          font-size: 30%;
         }
         .tdnn {
           margin: 0 auto;
-          margin-top: 1.5em; // 10% less than before
+          margin-top: 1.5em;
           position: relative;
-          height: 4.8em; // 10% less than before
-          width: 9em; // 10% less than before
-          border-radius: 4.8em; // 10% less than before
+          height: 4.8em;
+          width: 9em;
+          border-radius: 4.8em;
           transition: all 500ms ease-in-out;
           background: #423966;
         }
@@ -46,12 +46,12 @@ const ThemeSwitch = () => {
           position: absolute;
           border-radius: 50%;
           transition: all 400ms ease-in-out;
-          width: 3em; // 10% less than before
-          height: 3em; // 10% less than before
+          width: 3em;
+          height: 3em;
         }
         .moon {
-          top: 0.9em; // 10% less than before
-          left: 0.9em; // 10% less than before
+          top: 0.9em;
+          left: 0.9em;
           transform: rotate(-75deg);
           background: #423966;
           box-shadow: 0.9em 0.75em 0 0em #d9fbff inset,
@@ -65,11 +65,11 @@ const ThemeSwitch = () => {
             rgba(255, 255, 255, 0.1) -0.3em 3em 0 -1.35em;
         }
         .sun {
-          top: 1.35em; // 10% less than before
-          left: 5.4em; // 10% less than before
+          top: 1.35em;
+          left: 5.4em;
           transform: rotate(0deg);
-          width: 2.1em; // 10% less than before
-          height: 2.1em; // 10% less than before
+          width: 2.1em;
+          height: 2.1em;
           background: #fff;
           box-shadow: 0.9em 0.9em 0 1.5em #fff inset, 0 -1.5em 0 -0.81em #fff,
             1.05em -1.05em 0 -0.9em #fff, 1.5em 0 0 -0.81em #fff, 1.05em 1.05em 0 -0.9em #fff,

@@ -1,7 +1,7 @@
 const siteMetadata = {
   title: "Alex Rosen's Website",
   author: 'Alex Rosen',
-  headerTitle: "Alex Rosen's Website",
+  headerTitle: 'Home',
   description: 'I study computer science at the University of Toronto.',
   language: 'en-us',
   theme: 'system', // system, dark or light
