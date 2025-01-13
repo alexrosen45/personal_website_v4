@@ -1,0 +1,119 @@
+---
+title: 'Generative Models Under Geometric Constraints'
+output:
+  pdf_document:
+    extra_dependencies:
+      amsmath: null
+      amssymb: null
+      graphicx: null
+      hyperref: ['colorlinks=true', 'allcolors=blue']
+      mathcal: null
+
+date: '2025-1-12'
+tags: ['diffusion', 'probabilistic-learning', 'constraints']
+draft: false
+summary: 'Sampling from distributions while satisfying geometric constraints.'
+bibliography: constraints-I.bib
+---
+
+## Introduction
+
+Diffusion models and DDPM [@abs-2006-11239] were originally inspired by a random walk from non-equilibirum thermodynamics, where we define a process to gradually move from a training sample to noise we call an equilibrium state [@Sohl-DicksteinW15]. This perspective unveiled a new framework to train a generative model by learning to reverse this process moving from an equilibrium state to a high-concentration sample resembling our dataset.
+
+It turns out that this point of view for training a generative model has many deep and intuitive properties, from an absence of joint training objectives to the reverse random walk encouraging a diverse set of samples. Still, one desireable property seems to remain elusive: How do we bake constraints into the reverse process or final sample? How might we sample a configuration of objects in a room with guarantees they don't overlap? My work attempts to pave a path forward for diffusion-esque algorithms that facilitate sampling under geometric constraints.
+
+## Background on diffusion
+
+DDPMs belong to a class of generative models whose sampling process involves moving backwards through a finite first-order Markov chain starting from an isotropic Gaussian noise equilibrium. Given the previous element $x_{t-1}$ in our chain (starting with a sample $x_0$ from our training set), we define the forward process for $x_t$ as
+
+$$
+    q(x_{t}|x_{t-1})=\mathcal{N}(\sqrt{1-\beta_t}x_{t-1},\beta_t\mathbb{I})
+$$
+
+which we can sample directly from $x_0$ as
+
+$$
+    q(x_{t}|x_0)=\mathcal{N}(\sqrt{\overline{\alpha}_t}x_0,(1-\overline{\alpha}_t)\mathbb{I})
+$$
+
+for $\alpha_t=1-\beta_t$ and $\overline{\alpha}_t=\prod_{i=1}^t \alpha_t$. This forward process is repeated for $T$ steps (usually 1000), and we choose $\{\beta_t\}_{t=1}^T$ so that equilibrium $x_T$ is approximately standard normal.
+
+At inference time, start with a sample $x_T$ and seek to repeatedly sample $x_{t-1}$ given $x_t$ until we reach $x_0$. Using the reparameterization trick, we can write
+
+$$
+    x_0=\tfrac{1}{\sqrt{\overline{\alpha}_t}}\left(x_0-\sqrt{1-\overline{\alpha}_t}\epsilon\right)
+$$
+
+for $\epsilon\sim N(0,1)$, allowing us to show the mean of the reverse posterior
+
+$$
+    q(x_{t-1}|x_t,x_0)=\frac{q(x_t|x_{t-1},x_0)q(x_{t-1}|x_0)}{q(x_t|x_0)}
+$$
+
+is
+
+$$
+    \mu=\tfrac{1}{\sqrt{\alpha_t}}\left(x_t-\frac{1-\alpha_t}{\sqrt{1-\overline{\alpha}_t}}\epsilon\right)
+$$
+
+So, we train a network to predict this $\epsilon$ given $x_t$ and $t$, and sample $x_{t-1}$ as this $\mu$ with small additive Gaussian noise dependent on $t$.
+
+With the success of this method came many subsequent alterations, such as speeding up the reverse process [@abs-2010-02502], reasoning about a more suitable variance schedule [@abs-2102-09672], or performing the diffusion process in a latent space [@abs-2112-10752]. Relevant follow-up work also includes cold diffusion [@bansal2022colddiffusioninvertingarbitrary], which generalizes the idea of diffusion to non-Gaussian or even deterministic equilibria. A much simpler algorithm, cold diffusion attempts to predict back $x_0$, learning a restoration operation $r_\theta$ given some degradation $x_t=d(x_0,t)$:
+
+$$
+    x_0\approx r_{\theta}(d(x_0, t))
+$$
+
+To sample an $x_0$, we start with $x_T$, predict $\hat{x}_0=r(x_T, T)$, run this prediction through our forward process to produce an $x_{t-1}=d(\hat{x}_0,t)$, and repeat until timestep zero.
+
+Incorporating constraints into the reverse process and final generation are typically problem specific, resulting in a variety of different methods, often approximations. My algorithm is an attempt at solving problems with geometric constraints in greater generality.
+
+## Proposed Method
+
+The formulations of diffusion in the previous section rely on an intermediate prediction of $x_0$, whether it's explicit with cold diffusion or implicitly through the mean of a posterior with DDPM. In order to account for constraints during sampling or constraints in the final output, we need some process involving these constraints during training, which we can introduce by having a direct prediction back one timestep, as opposed to an intermediate prediction or sampling process through $x_0$.
+
+My method begins with removing the Markov chain from the diffusion process and replacing it with linear interpolation between equilibria noise and training examples. At training time, we sample a timestep uniformly from $\{0,\ldots,T\}$, a training example $x_0$ and an equilibrium $\epsilon \sim q$ from any deterministic or non-deterministic distribution $q$. Lying on the line segment between $\epsilon$ and $x_0$, we define
+
+$$
+    x_t=\left(1-\tfrac{1}{T}\right)x_0+\tfrac{t}{T}\epsilon
+$$
+
+that approaches $\epsilon$ as $t\to T$ and $x_0$ as $t\to 0$. To devise a sampling algorithm to obtain $x_{t-1}$ given $x_t$, we can compute $x_{t-1}$ and $x_t$ using the same source of randomness $\epsilon$, and directly predict $x_{t-1}$ without conditioning on $x_0$.
+
+Now that we have a method to directly predict $x_{t-1}$, we can rephrase this prediction to incorporate constraints; instead of a model learning $x_{t-1}$, suppose we learn an initial velocity vector to apply to points in space $x_t$. Then, we can feed these velocity vectors and initial positions $x_t$ to a simulation, run this simulation, and record the final positions as our prediction for $x_{t-1}$. That is, for a differentiable physics engine $D(x,v)$ taking initial positions $x$ and velocities $v$ to final positions, a model $M$, and some loss $\mathcal{L}$ between $\hat{x}_{t-1}$ and $x_{t-1}$, we substitute the gradient descent step on
+
+$$
+    \nabla \mathcal{L}(x_{t-1}, M(x_t, t))
+$$
+
+for a step on
+
+$$
+    \nabla \mathcal{L}(x_{t-1}, D(x_t, M(x_t, t)))
+$$
+
+This introduction of $D$ allows the reverse process to move through space under constraints, such as object-to-object collisions, object-to-scene collisions, deformations, a background vector field, etc.
+
+At inference time, this algorithm remains similar to DDPM and cold diffusion. We sample $x_t=x_T\sim q$ and repeatedly compute $x_{t-1}=D(x_t, M(x_t, t))$ down to timestep zero.
+
+## Applications
+
+**Current focus:** The applications I aim to focus on in a first publication are:
+
+1. 3D point cloud generation with spheres instead of points. The goal is to match generation quality and diversity of current methods (for points only) while being able to guarantee that spheres don't overlap. This application would make my algorithm approachable to understand and it would be a straightforward way to demonstrate that it holds up against DDPM.
+2. Layout planning—like the previous application but with more complicated shapes and geometry.
+3. Solving jigsaw or Voronoi diagram related puzzles.
+
+**Denoising in the real world:** If performing inference in the real-world rather than simulation, the velocity vectors $M(x_t, t)$ would be applied to the objects in positions $x_t$ and $x_{t-1}$ would be measured from the scene after some fixed period of time. The differentiable physics engine $D$ may also be used to introduce small sources of randomness during training time simulations to ensure final positions are not fully determined by $x_T$ and our learned velocities are robust against discrepancies between simulation and the real world.
+
+**Image generation under geometric constraints:** I've thought a lot about using this method to have greater control over what diversity refers to in the context to image generation.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-full xl:px-2">
+    ![Gaussian](/static/blog/constraints-I/figure.png)
+  </div>
+</div>
+
+Figure 1 shows Figure 3 mapped to a normalized HSV color space and Figure 2 shows the result of an iterative separation algorithm to transform the points so that nearly all of them are 0.1 apart. Figure 4 shows Figure 3 mapped back to the pixel domain. Obviously, Figure 4 looks terrible, but what's interesting is that the image now appears diverse in color—notice the changes in the blues of the sky and water. With the right choice of the amount of separation and a large enough dataset, perhaps the algorithm I propose could be used to go beyond current notions of diversity for generative models (referring to outputs that look different or seem to encompass an entire distribution) and introduce notions of diversity in terms of the color spectrum across an image or ratios of frequency (using geometry in the Fourier domain to have samples ranging from a large number of low frequency to a large number of high frequency components). This is something I would come back to after a first publication.
+
+## References

@@ -72,7 +72,7 @@ const Hero = () => {
                     />
                   </svg>
                   <span className="pr-6 text-gray-700 dark:text-white">
-                    Some projects, work, and research
+                    Projects, work and research
                   </span>
                 </span>
                 <span className="pl-6 text-black dark:text-white">Discover &rarr;</span>

@@ -1,12 +1,12 @@
 ---
 name: Alex Rosen
-avatar: /static/images/avatar.jpg
-occupation: Computer Science Student
+avatar: /static/images/london.png
+occupation: Computer Science
 company: University of Toronto
-email: alexanderrosen45@gmail.com
-twitter: https://twitter.com/AlexRos27300998
+email: a.rosen@mail.utoronto.ca
 linkedin: https://www.linkedin.com/in/alex-rosen-7152281b7/
 github: https://github.com/alexrosen45
 ---
 
-Hi, I'm Alex! My studies, work, and general interests lie in machine learning, as well as some pure mathematics.
+Hi, I'm Alex! I'm an undergraduate student at the University of Toronto, splitting my time between researching generative models and working as a software engineer. My studies, work and general interests lie in computer vision, mathematics and hardware optimization for deep learning. The
+picture to the left was taken while traveling with my family to London!
