@@ -1,0 +1,51 @@
+---
+title: 'Diffusion Papers Reading List'
+output:
+  pdf_document:
+    extra_dependencies:
+      amsmath: null
+      amssymb: null
+      graphicx: null
+      hyperref: ['colorlinks=true', 'allcolors=blue']
+      mathcal: null
+
+date: '2025-7-1'
+tags: ['diffusion', 'probabilistic-learning', 'score-functions']
+draft: false
+summary: 'An incomplete reading list of diffusion model papers'
+---
+
+## An incomplete reading list of diffusion models papers
+
+### Useful things to know:
+
+- **Entropy:** https://en.wikipedia.org/wiki/Entropy_(information_theory)
+- **ELBO:** https://en.wikipedia.org/wiki/Evidence_lower_bound
+- **Fourier transform:** https://en.wikipedia.org/wiki/Fourier_transform
+- **Learning in the fourier domain:** https://arxiv.org/pdf/2006.10739
+- **Score functions:** https://jmlr.org/papers/volume6/hyvarinen05a/hyvarinen05a.pdf
+
+### Fundamental papers
+
+- **DDPM:** https://arxiv.org/pdf/2006.11239
+- **Improving DDPM schedules:** https://arxiv.org/pdf/2102.09672
+- **DDIM: Faster + deterministic (ish) sampler for DDPM:** https://arxiv.org/pdf/2010.02502
+- **Classifier guidance:** https://arxiv.org/pdf/2105.05233
+- **Classifier-free guidance:** https://arxiv.org/pdf/2207.12598
+- **Score-based methods:** https://arxiv.org/pdf/2011.13456
+- **Denoising in a latent space:** https://arxiv.org/pdf/2112.10752
+
+### Building off of the fundamental papers:
+
+- **ControlNet (condition on different stuff):** https://arxiv.org/pdf/2302.05543
+- **Sampling visual anagrams:** https://arxiv.org/pdf/2311.17919
+- **Solving linear inverse problems:** https://arxiv.org/pdf/2201.11793
+- **Solving non-linear inverse problems:** https://arxiv.org/pdf/2209.14687
+- **Learning clean distributions from noisy data:** https://arxiv.org/pdf/2305.19256
+- **Generative image dynamics:** https://arxiv.org/pdf/2309.07906
+- **Text to shape images with constraints:** https://arxiv.org/pdf/2503.14720
+
+### Generalizations:
+
+- **Sample with any equilibrium:** https://arxiv.org/pdf/2208.09392
+- **Score-based deblurring:** https://arxiv.org/pdf/2206.13397
